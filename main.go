@@ -1,14 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
+	"time"
 )
 
+// used as RGBA
 type Vec []float64 // Vector
 
 // we will indenfity a color vector by []float64{R, G, B ,A} (Vec{R,G,B,A})
 // we will identify a cube by [height][width][length][color]
+// verticies are idenfitied in [][]..verts indexed as 1 or 0 meaning top or bottom of the dimension for eg [1][0][0] is top height, bottom rows, bottom cols
 
 // start and end are vectors of the same dimension, steps is the length of the resulting interpolation [][]float64
 func Linear_interp(verts [2]Vec, steps int) []Vec {
@@ -166,8 +170,11 @@ func main() {
 		corners = append(corners,
 			Vec{float64(rand.Intn(((i + 1) + 1) * 30)),
 				float64(rand.Intn((i + 1) * 30)),
-				float64(rand.Intn((i + 1) * 30)), 255})
+				float64(rand.Intn((i + 1) * 30)),
+				255})
 	}
+
+	now := time.Now()
 
 	cube := Trilinear_interp([2][2][2]Vec{
 		{{corners[0], corners[1]},
@@ -175,11 +182,15 @@ func main() {
 
 		{{corners[4], corners[5]},
 			{corners[6], corners[7]}}},
-		20)
+		200)
+
+	fmt.Printf("Trilinear interp took: %d ms \n", time.Since(now).Milliseconds())
+	now = time.Now()
 
 	images := Export_Cube(cube)
 
 	for i, image := range images {
 		SaveImg(image, "./images/"+strconv.Itoa(i)+".png")
 	}
+	fmt.Printf("Drawing images took: %d ms \n", time.Since(now).Milliseconds())
 }
