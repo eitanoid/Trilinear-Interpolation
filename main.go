@@ -67,24 +67,24 @@ func Bilinear_interp(bb, bt, tb, tt []float64, steps int) [][][]float64 {
 }
 
 // looping order:
-// # is calculated @ is empty
+// @ is calculated # is empty
 //
-// #@@@#
-// @@@@@
-// @@@@@
-// #@@@#
+// @###@
+// #####
+// #####
+// @###@
 //
-// this isn't actually done, but the top and bottom row interp is calculated.
-// #####
-// @@@@@
+// this isn't written into the array yet, but the top and bottom row interp is calculated.
 // @@@@@
 // #####
+// #####
+// @@@@@
 //
-// use the saved slices to linear interp each col, repeat this step for each col
-// #####
-// #@@@@
-// #@@@@
-// #####
+// use the saved slices of the top and bottom interp to do another linear interp each col, repeat this step for each col
+// @@@@@
+// @####
+// @####
+// @@@@@
 
 func Trilinear_interp(bbb, bbt, btb, btt, tbb, tbt, ttb, ttt []float64, steps int) [][][][]float64 { // height row col color
 
