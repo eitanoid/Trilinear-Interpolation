@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func Export_Cube(cube [][][][]float64) []image.Image {
+func Export_Cube(cube [][][]Vec) []image.Image {
 	res := len(cube)
 
 	images := make([]image.Image, res)
