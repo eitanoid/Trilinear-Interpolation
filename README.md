@@ -1,5 +1,5 @@
 
-![example]()
+![example](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/showcase.mp4)
 
 # Description
 Linear, Bilinear and Trilinear Interpolation for any dimensional vectors with an example use in averaging colors.
