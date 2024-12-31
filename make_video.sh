@@ -1,3 +1,11 @@
 #!/bin/env bash
 
-ffmpeg -framerate 15 -i images/%d.png -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" -r 30 -pix_fmt yuv420p slideshow.mp4
+input_folder="images"
+output_file="slideshow.mp4"
+framerate=30
+bitrate="6000k"
+crf="1" #constant rate factor
+preset="veryslow"
+
+
+ffmpeg -framerate $framerate -i $input_folder/%d.png -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2,boxblur=10:1,format=yuv420p" -r $framerate -b:v $bitrate  -crf $crf -preset $preset $output_file

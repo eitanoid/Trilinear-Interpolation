@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"time"
 )
@@ -26,15 +27,15 @@ func Linear_interp(verts [2]Vec, steps int) []Vec {
 
 	diff := make([]float64, len(start))
 	for i := 0; i < dimension; i++ {
-		diff[i] = (end[i] - start[i]) / float64(steps+1) //x .. x + i* diff ... x + steps*diff = y, we want the end length to be steps + 2, so we need diff to be the 1/(steps+1) fraction
+		diff[i] = (end[i] - start[i]) / float64(steps-1) //x .. x + i* diff ... x + steps*diff = y, we want the end length to be steps + 2, so we need diff to be the 1/(steps+1) fraction
 	}
 
 	//initialize the return variable
-	interp := make([]Vec, steps+2) // the length after interpolating steps times
+	interp := make([]Vec, steps) // the length after interpolating steps times
 	interp[0] = start
-	interp[steps+1] = end
+	interp[steps-1] = end
 
-	for i := 1; i < steps+1; i++ {
+	for i := 1; i < steps; i++ {
 		interp[i] = make(Vec, dimension)
 		for pos, val := range diff {
 
@@ -61,15 +62,15 @@ func Bilinear_interp(verts [2][2]Vec, steps int) [][]Vec {
 	}
 
 	// initialize
-	plane := make([][]Vec, steps+2) // [row][col][color] where bb is [0][0] and tt is [steps+2][steps+2]
+	plane := make([][]Vec, steps) // [row][col][color] where bb is [0][0] and tt is [steps+2][steps+2]
 	for i := range plane {
-		plane[i] = make([]Vec, steps+2)
+		plane[i] = make([]Vec, steps)
 	}
 
 	first_col := Linear_interp([2]Vec{verts[0][0], verts[1][0]}, steps)
 	last_col := Linear_interp([2]Vec{verts[0][1], verts[1][1]}, steps)
 
-	for i := 0; i < steps+2; i++ { // no need to interp the 0th and steps+1th rows
+	for i := 0; i < steps; i++ { // no need to interp the 0th and steps+1th rows
 		plane[i] = Linear_interp([2]Vec{first_col[i], last_col[i]}, steps) // each row is the interp of the start and end of the row
 	}
 
@@ -106,9 +107,9 @@ func Trilinear_interp(verts [2][2][2]Vec, steps int) [][][]Vec { // height row c
 		}
 	}
 
-	cube := make([][][]Vec, steps+2)
+	cube := make([][][]Vec, steps)
 
-	corners := make([][]Vec, steps+2) // [0,1,2,3 are bb bt tb tt], height, color
+	corners := make([][]Vec, steps) // [0,1,2,3 are bb bt tb tt], height, color
 	corners[0] = Linear_interp([2]Vec{verts[0][0][0], verts[1][0][0]}, steps)
 	corners[1] = Linear_interp([2]Vec{verts[0][0][1], verts[1][0][1]}, steps)
 	corners[2] = Linear_interp([2]Vec{verts[0][1][0], verts[1][1][0]}, steps)
@@ -117,7 +118,7 @@ func Trilinear_interp(verts [2][2][2]Vec, steps int) [][][]Vec { // height row c
 	// trilinear_interp
 	// iterate over the height of the cube and interpolate each slice using the current heights bb,bt,tb,tt
 
-	for i := 0; i < steps+2; i++ {
+	for i := 0; i < steps; i++ {
 		bb, bt, tb, tt := corners[0][i], corners[1][i], corners[2][i], corners[3][i]
 		cube[i] = Bilinear_interp([2][2]Vec{{bb, bt}, {tb, tt}}, steps)
 	}
@@ -152,18 +153,13 @@ func Trilinear_interp(verts [2][2][2]Vec, steps int) [][][]Vec { // height row c
 //  goes this way ->
 
 func main() {
-	// test code
-	// bb, bt, tb, tt := []float64{0, 0}, []float64{0, 10}, []float64{10, 0}, []float64{10, 20}
-	//
-	// plane := bilinear_interp(bb, bt, tb, tt, 9)
-	//
-	// for _, row := range plane {
-	// 	fmt.Println(row)
-	// }
-
-	// bbb, bbt, btb, btt := []float64{200, 0, 0, 255}, []float64{0, 0, 10, 255}, []float64{0, 10, 0, 255}, []float64{0, 100, 10, 255}
-	// tbb, tbt, ttb, ttt := []float64{30, 100, 40, 255}, []float64{0, 100, 0, 255}, []float64{5, 50, 200, 255}, []float64{255, 100, 50, 255}
-	// cube := Trilinear_interp(bbb, bbt, btb, btt, tbb, tbt, ttb, ttt, 200)
+	//Handle user input
+	var depth int
+	args := os.Args
+	_, err := fmt.Sscanf(args[1], "%d", &depth)
+	if err != nil {
+		panic(err)
+	}
 
 	corners := []Vec{} // generate random entries for this code
 	for i := 0; i < 8; i++ {
@@ -182,13 +178,12 @@ func main() {
 
 		{{corners[4], corners[5]},
 			{corners[6], corners[7]}}},
-		200)
+		depth)
 
 	fmt.Printf("Trilinear interp took: %d ms \n", time.Since(now).Milliseconds())
 	now = time.Now()
 
 	images := Export_Cube(cube)
-
 	for i, image := range images {
 		SaveImg(image, "./images/"+strconv.Itoa(i)+".png")
 	}
