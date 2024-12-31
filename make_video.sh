@@ -16,7 +16,8 @@ if [ "$CONT" = "y" ]; then
 	else
 	echo "generating gif";
 	
-ffmpeg -framerate $framerate -i $input_folder/%d.png -filter_complex "[0:v]fps=$framerate,palettegen=max_colors=256[palette];[0:v][palette]paletteuse=dither=none" output.gif
+# ffmpeg -framerate $framerate -i $input_folder/%d.png -vf "fps=$framerate,scale=iw:ih:flags=lanczos" output.gif
+ffmpeg -framerate $framerate -i $input_folder/%d.png -filter_complex "[0:v]fps=$framerate,scale=iw:ih:flags=lanczos,palettegen=[palette];[0:v][palette]paletteuse=dither=floyd_steinberg" output.gif
 
 fi
 

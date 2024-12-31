@@ -1,3 +1,4 @@
 slideshow.mp4
 images/*
 *.gif
+!showcase/*
