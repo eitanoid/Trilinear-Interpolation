@@ -10,7 +10,6 @@ import (
 
 // used as RGBA
 type Vec []float64 // vector type
-
 var Supported_Formats = map[string]bool{"rgba": true, "oklab": true}
 
 func main() {
@@ -31,26 +30,34 @@ func main() {
 				float64(rand.Intn((i + 1) * 30)),
 				255})
 	}
-	fmt.Println(corners[1])
-	fmt.Println(corners[1].ToLAB().ToRGBA())
-	now := time.Now()
 
+	corners = []RGBA{ // constant rather than random values for debugging
+		{100, 200, 250, 255},
+		{50, 20, 10, 255},
+		{10, 10, 10, 255},
+		{250, 100, 5, 255},
+		{100, 100, 200, 255},
+		{150, 150, 0, 255},
+		{255, 255, 0, 255},
+		{0, 0, 255, 255},
+	}
+
+	now := time.Now()
 	cube := Trilinear_interp([2][2][2]Vec{ // parse as OKLAB
 		{
-			{corners[0].ToLAB().ToRaw(), corners[1].ToLAB().ToRaw()},
-			{corners[2].ToLAB().ToRaw(), corners[3].ToLAB().ToRaw()}},
+			{corners[0].ToRaw(), corners[1].ToRaw()},
+			{corners[2].ToRaw(), corners[3].ToRaw()}},
 
 		{
-			{corners[4].ToLAB().ToRaw(), corners[5].ToLAB().ToRaw()},
-			{corners[6].ToLAB().ToRaw(), corners[7].ToLAB().ToRaw()}}},
+			{corners[4].ToRaw(), corners[5].ToRaw()},
+			{corners[6].ToRaw(), corners[7].ToRaw()}}},
 		depth)
-
 	fmt.Printf("Trilinear interp took: %d ms \n", time.Since(now).Milliseconds())
 
 	// Return images
 	now = time.Now()
 
-	images := Export_Cube(cube, "oklab")
+	images := Export_Cube(cube, "rgba")
 	for i, image := range images {
 		Save_PNG(image, "./images/"+strconv.Itoa(i)+".png")
 	}

@@ -8,4 +8,17 @@ crf="1" #constant rate factor
 preset="veryslow"
 
 
-ffmpeg -framerate $framerate -i $input_folder/%d.png -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2,boxblur=10:1,format=yuv420p" -r $framerate -b:v $bitrate  -crf $crf -preset $preset $output_file
+read -p "y for mp4 video, else generates a gif (y/n)?" CONT
+if [ "$CONT" = "y" ]; then
+	echo "generating video";
+	ffmpeg -framerate $framerate -i $input_folder/%d.png -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2,boxblur=10:1,format=yuv420p" -r $framerate -b:v $bitrate  -crf $crf -preset $preset $output_file
+
+	else
+	echo "generating gif";
+	
+ffmpeg -framerate $framerate -i $input_folder/%d.png -filter_complex "[0:v]fps=$framerate,palettegen=max_colors=256[palette];[0:v][palette]paletteuse=dither=none" output.gif
+
+fi
+
+
+
