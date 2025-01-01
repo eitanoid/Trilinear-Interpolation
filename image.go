@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
 	"os"
+	"strconv"
 )
 
 // Passs a 3D structure of type Vec and the color format of the Vec, return a slice of images.
@@ -57,6 +59,29 @@ func Export_Plane(plane [][]Vec) image.Image {
 		}
 	}
 	return img
+}
+
+//export a plane into #rrggbb hex code
+func Export_Plane_Ansi(plane [][]Vec) []string {
+	res := len(plane)
+	hex_codes := make([]string, res)
+
+	for row := 0; row < res; row++ {
+		str := ""
+		for col := 0; col < res; col++ {
+			R := uint8(plane[row][col][0])
+			G := uint8(plane[row][col][1])
+			B := uint8(plane[row][col][2])
+			str += " " + fmt.Sprintf("\033[48;2;%d;%d;%dm%s\033[0m", R, G, B, strconv.Itoa(row)+strconv.Itoa(col)) // ansi escape sequencefor background colored text
+		}
+		hex_codes[row] = str + "\n"
+	}
+	return hex_codes
+}
+
+// turn the first 3 ONLY entries into an ansi escape sequence for background colored text
+func (v Vec) To_Ansi(text string) string {
+	return fmt.Sprintf("\033[48;2;%d;%d;%dm%s\033[0m", int(v[0]), int(v[1]), int(v[2]), text)
 }
 
 func Save_PNG(img image.Image, name string) error {
