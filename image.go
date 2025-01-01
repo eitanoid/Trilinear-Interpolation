@@ -78,8 +78,10 @@ func Export_Plane_Ansi(plane [][]Vec) []string {
 	return ansi
 }
 
+// if show_codes = true, show the hex value of each color, otherwise print the index
+//
 //export a cube into ansi escape sequences, return [depth][row]string where each string is the formatted column
-func Export_Cube_Ansi(cube [][][]Vec, spacing int) [][]string {
+func Export_Cube_Ansi(cube [][][]Vec, spacing int, show_codes bool) [][]string {
 	res := len(cube)
 	ansi_cube := make([][]string, res)
 
@@ -91,9 +93,14 @@ func Export_Cube_Ansi(cube [][][]Vec, spacing int) [][]string {
 			ansi_cube[dep][row] = ""
 
 			for col, pt := range line {
-				ansi_cube[dep][row] += pt.To_Ansi(fmt.Sprintf("%d%d%d", dep, row, col)) + strings.Repeat(" ", spacing)
+				switch {
+				case show_codes:
+					ansi_cube[dep][row] += pt.To_Ansi(pt.To_HexCode()) + strings.Repeat(" ", spacing)
+				default:
+					ansi_cube[dep][row] += pt.To_Ansi(fmt.Sprintf("%d%d%d", dep, row, col)) + strings.Repeat(" ", spacing)
+				}
 			}
-			// ansi_cube[dep][row] = ansi_cube[dep][row][:res-spacing]
+			// ansi_cube[dep][row] = ansi_cube[dep][row][:res-spacing+1]
 
 		}
 
@@ -117,4 +124,9 @@ func Save_PNG(img image.Image, name string) error {
 	err = png.Encode(f, img)
 
 	return err
+}
+
+// return the first 3 ONLY entries as a hexadecimal color code
+func (v Vec) To_HexCode() string {
+	return fmt.Sprintf("#%02X%02X%02X", int(v[0]), int(v[1]), int(v[2]))
 }

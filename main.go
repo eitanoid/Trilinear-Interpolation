@@ -58,16 +58,24 @@ func main() {
 
 	if debug {
 		corners = []RGBA{ // constant rather than random values for debugging
-			{255, 255, 255, 255}, //#ffffff
-			{0, 0, 0, 255},       //#000000
-			{255, 0, 0, 255},     //#ff0000
-			{0, 255, 0, 255},     //#00ff00
+			{0, 0, 0, 255},       //#050304
 			{0, 0, 255, 255},     //#0000ff
+			{0, 255, 0, 255},     //#00ff00
+			{0, 255, 255, 255},   //#00ffff
+			{255, 0, 0, 255},     //#ff0000
 			{255, 0, 255, 255},   //#ff00ff
 			{255, 255, 0, 255},   //#ffff00
-			{0, 255, 255, 255},   //#00ffff
+			{255, 255, 255, 255}, //#ffffff
 		}
 	}
+	// {255, 255, 255, 255}, //#ffffff
+	// {0, 0, 0, 255},       //#000000
+	// {255, 0, 0, 255},     //#ff0000
+	// {0, 255, 0, 255},     //#00ff00
+	// {0, 0, 255, 255},     //#0000ff
+	// {255, 0, 255, 255},   //#ff00ff
+	// {255, 255, 0, 255},   //#ffff00
+	// {0, 255, 255, 255},   //#00ffff
 
 	// verts is indexed as [forward 0 / backward 1][top 0 / bottom 1][left 0/ right 1]
 	verts := [2][2][2]Vec{ // corners[n].ToLAB().ToRaw() to lerpas as OKLAB.
@@ -99,14 +107,15 @@ func main() {
 		}
 	} else { // print colors to terminal in groups of 3 planes per row
 
-		_cspace := 1 // how much space between each color in the planes
-		_hspace := 3 // how much space between planes horizontally
-		_vspace := 3 // how much space between planes vertically
+		_cspace := 1           // how much space between each color in the planes
+		_hspace := 2           // how much space between planes horizontally
+		_vspace := 1           // how much space between planes vertically
+		show_hex_codes := true // option to show hex or index
 
 		hspace := strings.Repeat(" ", _hspace)
 		vspace := strings.Repeat("\n", _vspace)
 
-		ansi_cube := Export_Cube_Ansi(cube, _cspace)
+		ansi_cube := Export_Cube_Ansi(cube, _cspace, show_hex_codes)
 		// fmt.Println(ansi_cube)
 		// fmt.Printf("%v %d \n", ansi_cube[0], len(ansi_cube[0]))
 		// fmt.Printf("%v %d \n", ansi_cube[0][0], len(ansi_cube[0][0]))
