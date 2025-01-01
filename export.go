@@ -39,6 +39,7 @@ func Export_Cube(cube [][][]Vec, format string) []image.Image {
 	return images
 }
 
+// Pass a 2D structure of type Vec and the color format of the Vec, return an image.Image
 func Export_Plane(plane [][]Vec, format string) image.Image {
 	res := len(plane)
 	img := image.NewRGBA(image.Rect(0, 0, res, res))
@@ -89,7 +90,7 @@ func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes boo
 		for row, line := range plane {
 			ansi_cube[dep][row] = ""
 
-			for col, _ := range line {
+			for col := range line {
 				pt := ParseFormat(line[col], format)
 
 				switch {
@@ -99,7 +100,6 @@ func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes boo
 					ansi_cube[dep][row] += pt.To_Ansi(fmt.Sprintf("%d%d%d", dep, row, col)) + strings.Repeat(" ", spacing)
 				}
 			}
-			// ansi_cube[dep][row] = ansi_cube[dep][row][:res-spacing+1]
 
 		}
 
@@ -107,12 +107,15 @@ func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes boo
 	return ansi_cube
 }
 
-// turn the first 3 ONLY entries into an ansi escape sequence for background colored text
+// parse the first 3 entries in v into an ansi escape sequence with a contrasting foreground text color
 func (v Vec) To_Ansi(text string) string {
-	luma := 0.299*(v[0])/255 + 0.587*(v[1])/255 + 0.144*(v[2])/255
+
+	// determine the foreground color based on the RGB value's luma
+	// luma := 0.299*(v[0])/255 + 0.587*(v[1])/255 + 0.144*(v[2])/255
+	luma := 299*int(v[0]) + 587*int(v[1]) + 144*int(v[2])
 	fg := ""
 
-	if luma > 0.5 {
+	if luma > 600*255 { // multiplying here by 255 is equivalent to dividing each component by 255
 		fg = "30;"
 	}
 
@@ -132,7 +135,7 @@ func Save_PNG(img image.Image, name string) error {
 	return err
 }
 
-// return the first 3 ONLY entries as a hexadecimal color code
+// parse the first 3 entries of v into an #RRGGBB hex code
 func (v Vec) To_HexCode() string {
 	return fmt.Sprintf("#%02X%02X%02X", int(v[0]), int(v[1]), int(v[2]))
 }

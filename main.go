@@ -55,7 +55,8 @@ func main() {
 	input_verts := []RGBA{} // generate random entries for this code as RGBA
 	for i := 0; i < 8; i++ {
 		input_verts = append(input_verts,
-			RGBA{float64(rand.Intn(((i + 1) + 1) * 30)),
+			RGBA{
+				float64(rand.Intn((i + 1) * 30)),
 				float64(rand.Intn((i + 1) * 30)),
 				float64(rand.Intn((i + 1) * 30)),
 				255})

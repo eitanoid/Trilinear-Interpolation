@@ -8,10 +8,6 @@ import (
 type RGBA Vec // it may be nice to visualise when something is used
 type OKLAB Vec
 
-type color_format interface {
-	Export() color.RGBA
-}
-
 func (v RGBA) ToRaw() Vec { // RGBA is 0 1 2 3
 	return Vec(v)
 }

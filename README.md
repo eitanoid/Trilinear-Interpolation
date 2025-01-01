@@ -28,4 +28,4 @@ The following flags can be passed to the binary:
 
 # TODO:
 - User input
-- Gif in readme
+
