@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -29,7 +28,49 @@ func Print_Input(verts [2][2][2]Vec, depth int, format string) {
 	}
 
 	fmt.Printf("Interpolating %d times, in %s format, between: \n%s   %s\n%s   %s\n", depth, format, front_face["top"], back_face["top"], front_face["bottom"], back_face["bottom"])
+}
 
+func Parse_Input(input string) []RGBA {
+	var verts = make([]RGBA, 8)
+	entries := strings.Split(input, ",")
+	if len(entries) != 8 {
+		panic("must contain exactly 8 codes")
+	}
+	dimension := len(entries[0]) - 1
+	if (dimension != 6) && (dimension != 8) && dimension != 0 {
+		panic("all hex codes must contain 3 or 4 channels")
+	}
+
+	for i, entry := range entries {
+		entry = entry[1:]
+		if len(entry) != dimension {
+			panic("all hex codes must be of same length")
+		}
+
+		switch dimension {
+		case 6:
+			r, _ := strconv.ParseInt(entry[:2], 16, 64)
+			g, _ := strconv.ParseInt(entry[2:4], 16, 64)
+			b, _ := strconv.ParseInt(entry[4:6], 16, 64)
+			verts[i] = RGBA{float64(r), float64(g), float64(b)}
+		case 8:
+			r, _ := strconv.ParseInt(entry[:2], 16, 64)
+			g, _ := strconv.ParseInt(entry[2:4], 16, 64)
+			b, _ := strconv.ParseInt(entry[4:6], 16, 64)
+			a, _ := strconv.ParseInt(entry[6:8], 16, 64)
+			verts[i] = RGBA{float64(r), float64(g), float64(b), float64(a)}
+		case 0: // create random verts
+			for i := 0; i < 8; i++ {
+				verts[i] = RGBA{
+					float64(rand.Intn((i + 1) * 30)),
+					float64(rand.Intn((i + 1) * 30)),
+					float64(rand.Intn((i + 1) * 30)),
+					255}
+			}
+		}
+
+	}
+	return verts
 }
 
 func main() {
@@ -40,6 +81,7 @@ func main() {
 	_debug := flag.Bool("d", false, "Set vertecies to debug mode")
 	_hex := flag.Bool("H", false, "If not returning image, return terminal print as hex codes rather than indicies")
 	_generate_images := flag.Bool("i", false, "Generate 'depth' images of the interpolation")
+	_input_verts := flag.String("verts", "", "Enter 8 verticies as RGBA HEX codes seperated by commas: '#000000,#FFFFFF...' indecies will read as Front Top: 01, Front Bottom: 23, Back Top: 45, Back Bottom: 67")
 
 	flag.Parse()
 
@@ -49,19 +91,9 @@ func main() {
 	generate_images := *_generate_images
 	hex := *_hex
 	debug := *_debug
-
+	input_verts := Parse_Input(*_input_verts)
 	// fmt.Printf("%v,%v,%v,%v\n", format, depth, verbose, generate_images)
-
-	input_verts := []RGBA{} // generate random entries for this code as RGBA
-	for i := 0; i < 8; i++ {
-		input_verts = append(input_verts,
-			RGBA{
-				float64(rand.Intn((i + 1) * 30)),
-				float64(rand.Intn((i + 1) * 30)),
-				float64(rand.Intn((i + 1) * 30)),
-				255})
-	}
-
+	// fmt.Println(input_verts)
 	if debug {
 		input_verts = []RGBA{ // constant rather than random values for debugging
 			{0, 0, 0, 255},       //#000000
@@ -148,6 +180,5 @@ func main() {
 
 	if verbose {
 		fmt.Printf("Output took: %v \n", time.Since(now))
-		fmt.Printf("cols : %v\n", os.Getenv("COLUMNS"))
 	}
 }
