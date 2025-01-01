@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+//TODO: user input colors
+
 // used as RGBA
 type Vec []float64 // vector type
 var Supported_Formats = map[string]bool{"rgba": true, "oklab": true}
@@ -47,9 +49,9 @@ func main() {
 
 	// fmt.Printf("%v,%v,%v,%v\n", format, depth, verbose, generate_images)
 
-	corners := []RGBA{} // generate random entries for this code as RGBA
+	input_verts := []RGBA{} // generate random entries for this code as RGBA
 	for i := 0; i < 8; i++ {
-		corners = append(corners,
+		input_verts = append(input_verts,
 			RGBA{float64(rand.Intn(((i + 1) + 1) * 30)),
 				float64(rand.Intn((i + 1) * 30)),
 				float64(rand.Intn((i + 1) * 30)),
@@ -57,8 +59,8 @@ func main() {
 	}
 
 	if debug {
-		corners = []RGBA{ // constant rather than random values for debugging
-			{0, 0, 0, 255},       //#050304
+		input_verts = []RGBA{ // constant rather than random values for debugging
+			{0, 0, 0, 255},       //#000000
 			{0, 0, 255, 255},     //#0000ff
 			{0, 255, 0, 255},     //#00ff00
 			{0, 255, 255, 255},   //#00ffff
@@ -68,24 +70,29 @@ func main() {
 			{255, 255, 255, 255}, //#ffffff
 		}
 	}
-	// {255, 255, 255, 255}, //#ffffff
-	// {0, 0, 0, 255},       //#000000
-	// {255, 0, 0, 255},     //#ff0000
-	// {0, 255, 0, 255},     //#00ff00
-	// {0, 0, 255, 255},     //#0000ff
-	// {255, 0, 255, 255},   //#ff00ff
-	// {255, 255, 0, 255},   //#ffff00
-	// {0, 255, 255, 255},   //#00ffff
+
+	corners := make([]Vec, 8)
+	switch format { // which format to interpolate as:
+	case "oklab":
+		for i := range corners {
+			corners[i] = input_verts[i].ToLAB().ToRaw()
+		}
+	default:
+	case "rgba":
+		for i := range corners {
+			corners[i] = input_verts[i].ToRaw()
+		}
+	}
 
 	// verts is indexed as [forward 0 / backward 1][top 0 / bottom 1][left 0/ right 1]
 	verts := [2][2][2]Vec{ // corners[n].ToLAB().ToRaw() to lerpas as OKLAB.
 		{
-			{corners[0].ToRaw(), corners[1].ToRaw()},
-			{corners[2].ToRaw(), corners[3].ToRaw()}},
+			{corners[0], corners[1]},
+			{corners[2], corners[3]}},
 
 		{
-			{corners[4].ToRaw(), corners[5].ToRaw()},
-			{corners[6].ToRaw(), corners[7].ToRaw()}},
+			{corners[4], corners[5]},
+			{corners[6], corners[7]}},
 	}
 
 	if verbose {
@@ -101,7 +108,7 @@ func main() {
 	now = time.Now()
 	if generate_images {
 
-		images := Export_Cube(cube, "rgba")
+		images := Export_Cube(cube, format)
 		for i, image := range images {
 			Save_PNG(image, "./images/"+strconv.Itoa(i)+".png")
 		}

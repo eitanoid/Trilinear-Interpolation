@@ -110,7 +110,14 @@ func Export_Cube_Ansi(cube [][][]Vec, spacing int, show_codes bool) [][]string {
 
 // turn the first 3 ONLY entries into an ansi escape sequence for background colored text
 func (v Vec) To_Ansi(text string) string {
-	return fmt.Sprintf("\033[48;2;%d;%d;%dm%s\033[0m", int(v[0]), int(v[1]), int(v[2]), text)
+	luma := 0.299*(v[0])/255 + 0.587*(v[1])/255 + 0.144*(v[2])/255
+	fg := ""
+
+	if luma > 0.5 {
+		fg = "30;"
+	}
+
+	return fmt.Sprintf("\x1b[%s48;2;%d;%d;%dm%s\x1b[m", fg, int(v[0]), int(v[1]), int(v[2]), text)
 }
 
 func Save_PNG(img image.Image, name string) error {
