@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -13,7 +14,7 @@ type Vec []float64 // vector type
 var Supported_Formats = map[string]bool{"rgba": true, "oklab": true}
 
 func Print_Input(verts [2][2][2]Vec, depth int, format string) {
-	_depth := strconv.Itoa(depth)
+	_depth := strconv.Itoa(depth - 1)
 
 	front_face := map[string]string{
 		"top":    fmt.Sprintf("%s%s", verts[0][0][0].To_Ansi("000"), verts[0][0][1].To_Ansi("00"+_depth)),
@@ -96,11 +97,35 @@ func main() {
 		for i, image := range images {
 			Save_PNG(image, "./images/"+strconv.Itoa(i)+".png")
 		}
-	} else { // print colors to terminal
-		for _, plane := range cube {
-			fmt.Println(Export_Plane_Ansi(plane))
+	} else { // print colors to terminal in groups of 3 planes per row
+
+		_cspace := 1 // how much space between each color in the planes
+		_hspace := 3 // how much space between planes horizontally
+		_vspace := 3 // how much space between planes vertically
+
+		hspace := strings.Repeat(" ", _hspace)
+		vspace := strings.Repeat("\n", _vspace)
+
+		ansi_cube := Export_Cube_Ansi(cube, _cspace)
+		// fmt.Println(ansi_cube)
+		// fmt.Printf("%v %d \n", ansi_cube[0], len(ansi_cube[0]))
+		// fmt.Printf("%v %d \n", ansi_cube[0][0], len(ansi_cube[0][0]))
+		for dep, res := 0, len(cube); dep < res; dep += 3 {
+
+			for row := 0; row < res; row++ {
+				switch {
+				case dep+2 < res: // print 3 points
+					fmt.Printf("%s%s%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row], hspace, ansi_cube[dep+2][row]) // col+space+col+space
+				case dep+2 == res: // print 2 planes
+					fmt.Printf("%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row]) // col+space+col+space
+				case dep+1 == res: // print 1 plane
+					fmt.Printf("%s\n", ansi_cube[dep][row]) // col
+				}
+			}
+			fmt.Print(vspace) // print vspace at the end of each series of planes
 		}
 	}
+
 	if verbose {
 		fmt.Printf("Output took: %d ms \n", time.Since(now).Milliseconds())
 	}

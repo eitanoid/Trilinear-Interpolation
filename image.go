@@ -6,7 +6,7 @@ import (
 	"image/color"
 	"image/png"
 	"os"
-	"strconv"
+	"strings"
 )
 
 // Passs a 3D structure of type Vec and the color format of the Vec, return a slice of images.
@@ -61,22 +61,44 @@ func Export_Plane(plane [][]Vec) image.Image {
 	return img
 }
 
-//export a plane into #rrggbb hex code
+//export a plane into ansi escape sequences return [row]string
 func Export_Plane_Ansi(plane [][]Vec) []string {
 	res := len(plane)
-	hex_codes := make([]string, res)
+	ansi := make([]string, res)
 
 	for row := 0; row < res; row++ {
-		str := ""
+		ansi[row] = ""
 		for col := 0; col < res; col++ {
 			R := uint8(plane[row][col][0])
 			G := uint8(plane[row][col][1])
 			B := uint8(plane[row][col][2])
-			str += " " + fmt.Sprintf("\033[48;2;%d;%d;%dm%s\033[0m", R, G, B, strconv.Itoa(row)+strconv.Itoa(col)) // ansi escape sequencefor background colored text
+			ansi[row] += fmt.Sprintf("\033[48;2;%d;%d;%dm%s\033[0m", R, G, B, fmt.Sprintf("%d%d", row, col)) // ansi escape sequencefor background colored text
 		}
-		hex_codes[row] = str + "\n"
 	}
-	return hex_codes
+	return ansi
+}
+
+//export a cube into ansi escape sequences, return [depth][row]string where each string is the formatted column
+func Export_Cube_Ansi(cube [][][]Vec, spacing int) [][]string {
+	res := len(cube)
+	ansi_cube := make([][]string, res)
+
+	for dep, plane := range cube {
+
+		ansi_cube[dep] = make([]string, res) // each plane is [row]string
+
+		for row, line := range plane {
+			ansi_cube[dep][row] = ""
+
+			for col, pt := range line {
+				ansi_cube[dep][row] += pt.To_Ansi(fmt.Sprintf("%d%d%d", dep, row, col)) + strings.Repeat(" ", spacing)
+			}
+			// ansi_cube[dep][row] = ansi_cube[dep][row][:res-spacing]
+
+		}
+
+	}
+	return ansi_cube
 }
 
 // turn the first 3 ONLY entries into an ansi escape sequence for background colored text
