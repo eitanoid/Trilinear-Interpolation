@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -105,7 +106,7 @@ func main() {
 	now := time.Now()
 	cube := Trilinear_interp(verts, depth)
 	if verbose {
-		fmt.Printf("Trilinear interp took: %.3f ms \n", float64(time.Since(now).Nanoseconds())/1000000)
+		fmt.Printf("Trilinear interp took: %v \n", time.Since(now))
 	}
 
 	// Return images
@@ -145,6 +146,7 @@ func main() {
 	}
 
 	if verbose {
-		fmt.Printf("Output took: %.3f ms \n", float64(time.Since(now).Nanoseconds()/1000000))
+		fmt.Printf("Output took: %v \n", time.Since(now))
+		fmt.Printf("cols : %v\n", os.Getenv("COLUMNS"))
 	}
 }
