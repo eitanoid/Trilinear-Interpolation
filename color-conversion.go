@@ -49,3 +49,15 @@ func (lab_color OKLAB) ToRGBA() RGBA { // float oklab -> package oklab -> float 
 
 	return RGBA{float64(r), float64(g), float64(b), lab_color[3]}
 }
+
+func ParseFormat(v Vec, format string) Vec { // turn all formats to raw rgba vector
+
+	switch format {
+
+	case "rgba":
+	// do nothing
+	case "oklab":
+		v = OKLAB(v).ToRGBA().ToRaw()
+	}
+	return v
+}

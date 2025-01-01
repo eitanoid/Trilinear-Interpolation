@@ -122,7 +122,7 @@ func main() {
 		hspace := strings.Repeat(" ", _hspace)
 		vspace := strings.Repeat("\n", _vspace)
 
-		ansi_cube := Export_Cube_Ansi(cube, _cspace, show_hex_codes)
+		ansi_cube := Export_Cube_Ansi(cube, format, _cspace, show_hex_codes)
 		// fmt.Println(ansi_cube)
 		// fmt.Printf("%v %d \n", ansi_cube[0], len(ansi_cube[0]))
 		// fmt.Printf("%v %d \n", ansi_cube[0][0], len(ansi_cube[0][0]))
