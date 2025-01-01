@@ -1,7 +1,7 @@
 
 | Example 1 | Example 2 |
 |:- |:- |
-|![example](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/output.gif) | ![Example2](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/"ansi example.png")|
+|![example](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/output.gif) | ![Example2](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/ansi%20example.png)|
 
 # Description
 Linear, Bilinear and Trilinear Interpolation for any dimensional vectors with an example use in averaging colors in RGBA and OkLab color spaces.
