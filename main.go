@@ -19,12 +19,12 @@ func Print_Input(verts [2][2][2]Vec, depth int, format string) {
 	_depth := strconv.Itoa(depth - 1)
 
 	front_face := map[string]string{
-		"top":    fmt.Sprintf("%s%s", verts[0][0][0].To_Ansi("000"), verts[0][0][1].To_Ansi("00"+_depth)),
-		"bottom": fmt.Sprintf("%s%s", verts[0][1][0].To_Ansi("010"), verts[0][1][1].To_Ansi("0"+_depth+_depth)),
+		"top":    fmt.Sprintf("%s%s", ParseFormat(verts[0][0][0], format).To_Ansi("000"), ParseFormat(verts[0][0][1], format).To_Ansi("00"+_depth)),
+		"bottom": fmt.Sprintf("%s%s", ParseFormat(verts[0][1][0], format).To_Ansi("010"), ParseFormat(verts[0][1][1], format).To_Ansi("0"+_depth+_depth)),
 	}
 	back_face := map[string]string{
-		"top":    fmt.Sprintf("%s%s", verts[1][0][0].To_Ansi(_depth+"00"), verts[1][0][1].To_Ansi(_depth+"0"+_depth)),
-		"bottom": fmt.Sprintf("%s%s", verts[1][1][0].To_Ansi(_depth+_depth+"0"), verts[1][1][1].To_Ansi(_depth+_depth+_depth)),
+		"top":    fmt.Sprintf("%s%s", ParseFormat(verts[1][0][0], format).To_Ansi(_depth+"00"), ParseFormat(verts[1][0][1], format).To_Ansi(_depth+"0"+_depth)),
+		"bottom": fmt.Sprintf("%s%s", ParseFormat(verts[1][1][0], format).To_Ansi(_depth+_depth+"0"), ParseFormat(verts[1][1][1], format).To_Ansi(_depth+_depth+_depth)),
 	}
 
 	fmt.Printf("Interpolating %d times, in %s format, between: \n%s   %s\n%s   %s\n", depth, format, front_face["top"], back_face["top"], front_face["bottom"], back_face["bottom"])
@@ -37,6 +37,7 @@ func main() {
 	_depth := flag.Int("depth", 6, "Interpolate to 'depth' points.")
 	_verbose := flag.Bool("v", false, "Verbose")
 	_debug := flag.Bool("d", false, "Set vertecies to debug mode")
+	_hex := flag.Bool("H", false, "If not returning image, return terminal print as hex codes rather than indicies")
 	_generate_images := flag.Bool("i", false, "Generate 'depth' images of the interpolation")
 
 	flag.Parse()
@@ -45,6 +46,7 @@ func main() {
 	depth := *_depth
 	verbose := *_verbose
 	generate_images := *_generate_images
+	hex := *_hex
 	debug := *_debug
 
 	// fmt.Printf("%v,%v,%v,%v\n", format, depth, verbose, generate_images)
@@ -102,7 +104,9 @@ func main() {
 	// Run Trilerp
 	now := time.Now()
 	cube := Trilinear_interp(verts, depth)
-	fmt.Printf("Trilinear interp took: %d ms \n", time.Since(now).Milliseconds())
+	if verbose {
+		fmt.Printf("Trilinear interp took: %d ms \n", time.Since(now).Milliseconds())
+	}
 
 	// Return images
 	now = time.Now()
@@ -114,18 +118,16 @@ func main() {
 		}
 	} else { // print colors to terminal in groups of 3 planes per row
 
-		_cspace := 1           // how much space between each color in the planes
-		_hspace := 2           // how much space between planes horizontally
-		_vspace := 1           // how much space between planes vertically
-		show_hex_codes := true // option to show hex or index
+		_cspace := 1          // how much space between each color in the planes
+		_hspace := 2          // how much space between planes horizontally
+		_vspace := 1          // how much space between planes vertically
+		show_hex_codes := hex // option to show hex or index
 
 		hspace := strings.Repeat(" ", _hspace)
 		vspace := strings.Repeat("\n", _vspace)
 
 		ansi_cube := Export_Cube_Ansi(cube, format, _cspace, show_hex_codes)
-		// fmt.Println(ansi_cube)
-		// fmt.Printf("%v %d \n", ansi_cube[0], len(ansi_cube[0]))
-		// fmt.Printf("%v %d \n", ansi_cube[0][0], len(ansi_cube[0][0]))
+
 		for dep, res := 0, len(cube); dep < res; dep += 3 {
 
 			for row := 0; row < res; row++ {
