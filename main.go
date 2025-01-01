@@ -105,7 +105,7 @@ func main() {
 	now := time.Now()
 	cube := Trilinear_interp(verts, depth)
 	if verbose {
-		fmt.Printf("Trilinear interp took: %d ms \n", time.Since(now).Milliseconds())
+		fmt.Printf("Trilinear interp took: %.3f ms \n", float64(time.Since(now).Nanoseconds())/1000000)
 	}
 
 	// Return images
@@ -145,6 +145,6 @@ func main() {
 	}
 
 	if verbose {
-		fmt.Printf("Output took: %d ms \n", time.Since(now).Milliseconds())
+		fmt.Printf("Output took: %.3f ms \n", float64(time.Since(now).Nanoseconds()/1000000))
 	}
 }
