@@ -34,7 +34,17 @@ func Parse_Input(input string) []RGBA {
 	var verts = make([]RGBA, 8)
 	entries := strings.Split(input, ",")
 	if len(entries) != 8 {
-		panic("must contain exactly 8 codes")
+		if len(entries) != 0 && len(entries) != 1 {
+			panic("must contain exactly 8 codes")
+		}
+		for i := 0; i < 8; i++ { // generate random verticies if empty
+			verts[i] = RGBA{
+				float64(rand.Intn((i + 1) * 30)),
+				float64(rand.Intn((i + 1) * 30)),
+				float64(rand.Intn((i + 1) * 30)),
+				255}
+		}
+		return verts
 	}
 	dimension := len(entries[0]) - 1
 	if (dimension != 6) && (dimension != 8) && dimension != 0 {
@@ -59,14 +69,7 @@ func Parse_Input(input string) []RGBA {
 			b, _ := strconv.ParseInt(entry[4:6], 16, 64)
 			a, _ := strconv.ParseInt(entry[6:8], 16, 64)
 			verts[i] = RGBA{float64(r), float64(g), float64(b), float64(a)}
-		case 0: // create random verts
-			for i := 0; i < 8; i++ {
-				verts[i] = RGBA{
-					float64(rand.Intn((i + 1) * 30)),
-					float64(rand.Intn((i + 1) * 30)),
-					float64(rand.Intn((i + 1) * 30)),
-					255}
-			}
+
 		}
 
 	}
@@ -93,9 +96,9 @@ func main() {
 	hex := *_hex
 	show_none := *_none
 	debug := *_debug
-	input_verts := Parse_Input(*_input_verts)
 	// fmt.Printf("%v,%v,%v,%v\n", format, depth, verbose, generate_images)
 	// fmt.Println(input_verts)
+	var input_verts []RGBA
 	if debug {
 		input_verts = []RGBA{ // constant rather than random values for debugging
 			{0, 0, 0, 255},       //#000000
@@ -107,6 +110,8 @@ func main() {
 			{255, 255, 0, 255},   //#ffff00
 			{255, 255, 255, 255}, //#ffffff
 		}
+	} else {
+		input_verts = Parse_Input(*_input_verts)
 	}
 
 	corners := make([]Vec, 8)
