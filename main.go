@@ -4,6 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	// "net/http"
+	// "log"
+	// _ "net/http/pprof"
 	"strconv"
 	"strings"
 	"time"
@@ -15,7 +18,7 @@ import (
 type Vec []float64 // vector type
 var Supported_Formats = map[string]bool{"rgba": true, "oklab": true}
 
-func Print_Input(verts [2][2][2]Vec, depth int, format string) {
+func print_input(verts [2][2][2]Vec, depth int, format string) {
 	_depth := strconv.Itoa(depth - 1)
 
 	front_face := map[string]string{
@@ -30,7 +33,7 @@ func Print_Input(verts [2][2][2]Vec, depth int, format string) {
 	fmt.Printf("Interpolating %d times, in %s format, between: \n%s   %s\n%s   %s\n", depth, format, front_face["top"], back_face["top"], front_face["bottom"], back_face["bottom"])
 }
 
-func Parse_Input(input string) []RGBA {
+func parse_input(input string) []RGBA {
 	var verts = make([]RGBA, 8)
 	entries := strings.Split(input, ",")
 	if len(entries) != 8 {
@@ -76,7 +79,69 @@ func Parse_Input(input string) []RGBA {
 	return verts
 }
 
+func output(cube [][][]Vec, format string, args []bool) {
+	generate_images, show_none, hex, verbose := args[0], args[1], args[2], args[3]
+	now := time.Now()
+
+	if generate_images {
+
+		images := Export_Cube(cube, format)
+		for i, image := range images {
+			Save_PNG(image, "./images/"+strconv.Itoa(i)+".png")
+		}
+	} else { // print colors to terminal in groups of 3 planes per row
+
+		_cspace := 1 // how much space between each color in the planes
+		_hspace := 1 // how much space between planes horizontally
+		_vspace := 1 // how much space between planes vertically
+
+		var show_codes int
+		switch { // option to show hex or index or none
+		case show_none:
+			show_codes = 2 // none
+		case hex:
+			show_codes = 1 // hex
+		default:
+			show_codes = 0 // indecies
+		}
+
+		hspace := strings.Repeat(" ", _hspace)
+		vspace := strings.Repeat("\n", _vspace)
+
+		ansi_cube := Export_Cube_Ansi(cube, format, _cspace, show_codes)
+
+		for dep, res := 0, len(cube); dep < res; {
+			planes_printed := 0
+			for row := 0; row < res; row++ {
+				switch {
+				case (dep+2 < res) && ((show_codes == 1 && res < 8) || (show_codes > 2 && res < 11) || (show_codes == 2 && res < 20)): // print 3 points, as long as there is space for them, reading terminal width would be nice for this..
+					fmt.Printf("%s%s%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row], hspace, ansi_cube[dep+2][row]) // col+space+col+space
+					planes_printed = 3
+				case (dep+2 <= res) && ((show_codes == 1 && res < 11) || (res < 18) || (show_codes == 2 && res < 42)): // print 2 planes
+					fmt.Printf("%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row]) // col+space+col+space
+					planes_printed = 2
+				default: // print 1 plane
+					fmt.Printf("%s\n", ansi_cube[dep][row]) // col
+					planes_printed = 1
+				}
+			}
+			dep += planes_printed
+			fmt.Print(vspace) // print vspace at the end of each series of planes
+		}
+	}
+
+	if verbose {
+		fmt.Printf("Output took: %v \n", time.Since(now))
+	}
+
+}
+
 func main() {
+	// //pprof:
+	// go func() {
+	// 	log.Println(http.ListenAndServe("localhost:6060", nil))
+	// }()
+
 	//Handle user input
 	_format := flag.String("format", "rgba", "In which format to interpolate.")
 	_depth := flag.Int("depth", 6, "Interpolate to 'depth' points.")
@@ -111,9 +176,10 @@ func main() {
 			{255, 255, 255, 255}, //#ffffff
 		}
 	} else {
-		input_verts = Parse_Input(*_input_verts)
+		input_verts = parse_input(*_input_verts)
 	}
 
+	// input_verts = parse_input("") // NOTE: for test purposes ONLY
 	corners := make([]Vec, 8)
 	switch format { // which format to interpolate as:
 	case "oklab":
@@ -139,7 +205,7 @@ func main() {
 	}
 
 	if verbose {
-		Print_Input(verts, depth, format)
+		print_input(verts, depth, format)
 	}
 
 	// Run Trilerp
@@ -148,57 +214,6 @@ func main() {
 	if verbose {
 		fmt.Printf("Trilinear interp took: %v \n", time.Since(now))
 	}
-
-	// Return images
-	now = time.Now()
-	if generate_images {
-
-		images := Export_Cube(cube, format)
-		for i, image := range images {
-			Save_PNG(image, "./images/"+strconv.Itoa(i)+".png")
-		}
-	} else { // print colors to terminal in groups of 3 planes per row
-
-		_cspace := 1 // how much space between each color in the planes
-		_hspace := 1 // how much space between planes horizontally
-		_vspace := 1 // how much space between planes vertically
-
-		var show_codes int
-		switch { // option to show hex or index or none
-		case show_none:
-			show_codes = 2 // none
-		case hex:
-			show_codes = 1 // hex
-		default:
-			show_codes = 0 // indecies
-		}
-
-		hspace := strings.Repeat(" ", _hspace)
-		vspace := strings.Repeat("\n", _vspace)
-
-		ansi_cube := Export_Cube_Ansi(cube, format, _cspace, show_codes)
-
-		for dep, res := 0, len(cube); dep < res; {
-			planes_printed := 0
-			for row := 0; row < res; row++ {
-				switch {
-				case (dep+2 < res) && ((show_codes == 1 && res < 8) || (res < 11) || (show_codes == 2 && res < 20)): // print 3 points, as long as there is space for them, reading terminal width would be nice for this..
-					fmt.Printf("%s%s%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row], hspace, ansi_cube[dep+2][row]) // col+space+col+space
-					planes_printed = 3
-				case (dep+2 <= res) && ((show_codes == 1 && res < 11) || (res < 18) || (show_codes == 2 && res < 42)): // print 2 planes
-					fmt.Printf("%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row]) // col+space+col+space
-					planes_printed = 2
-				default: // print 1 plane
-					fmt.Printf("%s\n", ansi_cube[dep][row]) // col
-					planes_printed = 1
-				}
-			}
-			dep += planes_printed
-			fmt.Print(vspace) // print vspace at the end of each series of planes
-		}
-	}
-
-	if verbose {
-		fmt.Printf("Output took: %v \n", time.Since(now))
-	}
+	//print output or generate images
+	output(cube, format, []bool{generate_images, show_none, hex, verbose})
 }

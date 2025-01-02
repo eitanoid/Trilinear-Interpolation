@@ -89,28 +89,31 @@ func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes int
 		ansi_cube[dep] = make([]string, res) // each plane is [row]string
 
 		for row, line := range plane {
-			ansi_cube[dep][row] = ""
+			// ansi_cube[dep][row]
+			row_builder := strings.Builder{}
 
 			for col := range line {
 				pt := ParseFormat(line[col], format)
 
 				switch show_codes {
 				case 1: // 1 for hex
-					ansi_cube[dep][row] += pt.To_Ansi(pt.To_HexCode()) + strings.Repeat(" ", spacing)
+					row_builder.WriteString(pt.To_Ansi(pt.To_HexCode()))
+					row_builder.WriteString(strings.Repeat(" ", spacing))
 				case 2: // 2 for none
-					ansi_cube[dep][row] += pt.To_Ansi("  ")
+					row_builder.WriteString(pt.To_Ansi("  "))
 				default: //indecies
 					var index string
 					if res > 16 { //overflows so I need to adjust spacing
 						f_string := fmt.Sprintf("%%%dx%%%dx%%%dx", index_channel_maxlen, index_channel_maxlen, index_channel_maxlen)
-						fmt.Println(f_string)
 						index = fmt.Sprintf(f_string, dep, row, col)
 					} else { //normally behaved string
 						index = fmt.Sprintf("%x%x%x", dep, row, col)
 					}
-
-					ansi_cube[dep][row] += pt.To_Ansi(index) + strings.Repeat(" ", spacing)
+					row_builder.WriteString(pt.To_Ansi(index))
+					row_builder.WriteString(strings.Repeat(" ", spacing))
 				}
+				ansi_cube[dep][row] = row_builder.String()
+
 			}
 
 		}
