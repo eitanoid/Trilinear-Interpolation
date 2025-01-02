@@ -1,7 +1,8 @@
 
 | Example 1 | Example 2 | Example 3 |
 |:- |:- | :-|
-|![example](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/output.gif) | ![Example2](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/ansi%20example.png)| ![Example3](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/ansi-example2.png)
+|![example](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/output.gif) | ![Example2](https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/ansi%20example.png)| <img src="https://github.com/eitanoid/Trilinear-Interpolation/blob/main/showcase/ansi-example2.png" alt="drawing" height="250" width="450"/>
+
 
 # Description
 
