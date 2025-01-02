@@ -79,9 +79,10 @@ func Export_Plane_Ansi(plane [][]Vec, format string) []string {
 // if show_codes = true, show the hex value of each color, otherwise print the index
 //
 //export a cube into ansi escape sequences, return [depth][row]string where each string is the formatted column
-func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes bool) [][]string {
+func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes int) [][]string {
 	res := len(cube)
 	ansi_cube := make([][]string, res)
+	index_channel_maxlen := len(fmt.Sprintf("%x", res-1))
 
 	for dep, plane := range cube {
 
@@ -93,11 +94,22 @@ func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes boo
 			for col := range line {
 				pt := ParseFormat(line[col], format)
 
-				switch {
-				case show_codes:
+				switch show_codes {
+				case 1: // 1 for hex
 					ansi_cube[dep][row] += pt.To_Ansi(pt.To_HexCode()) + strings.Repeat(" ", spacing)
-				default:
-					ansi_cube[dep][row] += pt.To_Ansi(fmt.Sprintf("%d%d%d", dep, row, col)) + strings.Repeat(" ", spacing)
+				case 2: // 2 for none
+					ansi_cube[dep][row] += pt.To_Ansi("  ")
+				default: //indecies
+					var index string
+					if res > 16 { //overflows so I need to adjust spacing
+						f_string := fmt.Sprintf("%%%dx%%%dx%%%dx", index_channel_maxlen, index_channel_maxlen, index_channel_maxlen)
+						fmt.Println(f_string)
+						index = fmt.Sprintf(f_string, dep, row, col)
+					} else { //normally behaved string
+						index = fmt.Sprintf("%x%x%x", dep, row, col)
+					}
+
+					ansi_cube[dep][row] += pt.To_Ansi(index) + strings.Repeat(" ", spacing)
 				}
 			}
 

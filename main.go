@@ -52,7 +52,7 @@ func Parse_Input(input string) []RGBA {
 			r, _ := strconv.ParseInt(entry[:2], 16, 64)
 			g, _ := strconv.ParseInt(entry[2:4], 16, 64)
 			b, _ := strconv.ParseInt(entry[4:6], 16, 64)
-			verts[i] = RGBA{float64(r), float64(g), float64(b)}
+			verts[i] = RGBA{float64(r), float64(g), float64(b), 255} // if alpha no specified set to 255
 		case 8:
 			r, _ := strconv.ParseInt(entry[:2], 16, 64)
 			g, _ := strconv.ParseInt(entry[2:4], 16, 64)
@@ -80,6 +80,7 @@ func main() {
 	_verbose := flag.Bool("v", false, "Verbose")
 	_debug := flag.Bool("d", false, "Set vertecies to debug mode")
 	_hex := flag.Bool("H", false, "If not returning image, return terminal print as hex codes rather than indicies")
+	_none := flag.Bool("N", false, "If not returning image, return terminal print as ansi colored spaces. Overrites Hex")
 	_generate_images := flag.Bool("i", false, "Generate 'depth' images of the interpolation")
 	_input_verts := flag.String("verts", "", "Enter 8 verticies as RGBA HEX codes seperated by commas: '#000000,#FFFFFF...' indecies will read as Front Top: 01, Front Bottom: 23, Back Top: 45, Back Bottom: 67")
 
@@ -90,6 +91,7 @@ func main() {
 	verbose := *_verbose
 	generate_images := *_generate_images
 	hex := *_hex
+	show_none := *_none
 	debug := *_debug
 	input_verts := Parse_Input(*_input_verts)
 	// fmt.Printf("%v,%v,%v,%v\n", format, depth, verbose, generate_images)
@@ -152,28 +154,41 @@ func main() {
 		}
 	} else { // print colors to terminal in groups of 3 planes per row
 
-		_cspace := 1          // how much space between each color in the planes
-		_hspace := 2          // how much space between planes horizontally
-		_vspace := 1          // how much space between planes vertically
-		show_hex_codes := hex // option to show hex or index
+		_cspace := 1 // how much space between each color in the planes
+		_hspace := 1 // how much space between planes horizontally
+		_vspace := 1 // how much space between planes vertically
+
+		var show_codes int
+		switch { // option to show hex or index or none
+		case show_none:
+			show_codes = 2 // none
+		case hex:
+			show_codes = 1 // hex
+		default:
+			show_codes = 0 // indecies
+		}
 
 		hspace := strings.Repeat(" ", _hspace)
 		vspace := strings.Repeat("\n", _vspace)
 
-		ansi_cube := Export_Cube_Ansi(cube, format, _cspace, show_hex_codes)
+		ansi_cube := Export_Cube_Ansi(cube, format, _cspace, show_codes)
 
-		for dep, res := 0, len(cube); dep < res; dep += 3 {
-
+		for dep, res := 0, len(cube); dep < res; {
+			planes_printed := 0
 			for row := 0; row < res; row++ {
 				switch {
-				case dep+2 < res: // print 3 points
+				case (dep+2 < res) && ((show_codes == 1 && res < 8) || (res < 11) || (show_codes == 2 && res < 20)): // print 3 points, as long as there is space for them, reading terminal width would be nice for this..
 					fmt.Printf("%s%s%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row], hspace, ansi_cube[dep+2][row]) // col+space+col+space
-				case dep+2 == res: // print 2 planes
+					planes_printed = 3
+				case (dep+2 <= res) && ((show_codes == 1 && res < 11) || (res < 18) || (show_codes == 2 && res < 42)): // print 2 planes
 					fmt.Printf("%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row]) // col+space+col+space
-				case dep+1 == res: // print 1 plane
+					planes_printed = 2
+				default: // print 1 plane
 					fmt.Printf("%s\n", ansi_cube[dep][row]) // col
+					planes_printed = 1
 				}
 			}
+			dep += planes_printed
 			fmt.Print(vspace) // print vspace at the end of each series of planes
 		}
 	}

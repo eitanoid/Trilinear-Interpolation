@@ -22,11 +22,7 @@ The following flags can be passed to the binary:
     -H     Hex. If printing to terminal, the palette will display hex color codes instead of the indicies.
     -i     Image. Generate `depth` image slices of the volume to './images'. If not set will print ansi formatted pallette to the terminal.
     -d     Debug. Sets the 8 verticies required for trilinear-interpolation to predefined values.
-    -verts Input Verts. Take exaclty 8 hex color codes from the user seperated by commas parsed as: front face:[0,1] back face: [4,5]. Eg: verts="#ff0000,#00ff00..."
-                                                                                                               [2,3]            [6,7]
+    -verts Input Verts, default is random. Take exaclty 8 hex color codes from the user seperated by commas parsed as: front face:[0,1] back face: [4,5]. Eg: verts="#ff0000,#00ff00..."
+                                                                                                                                  [2,3]            [6,7]
 ```
-
-
-# TODO:
-- User input
 
