@@ -92,7 +92,7 @@ func output(cube [][][]Vec, format string, args []bool) {
 	} else { // print colors to terminal in groups of 3 planes per row
 
 		_cspace := 1 // how much space between each color in the planes
-		_hspace := 1 // how much space between planes horizontally
+		_hspace := 2 // how much space between planes horizontally
 		_vspace := 1 // how much space between planes vertically
 
 		var show_codes int
@@ -114,10 +114,10 @@ func output(cube [][][]Vec, format string, args []bool) {
 			planes_printed := 0
 			for row := 0; row < res; row++ {
 				switch {
-				case (dep+2 < res) && ((show_codes == 1 && res < 8) || (show_codes > 2 && res < 11) || (show_codes == 2 && res < 20)): // print 3 points, as long as there is space for them, reading terminal width would be nice for this..
+				case (dep+2 < res) && ((show_codes == 1 && res < 8) || (!(show_codes == 1 || show_codes == 2) && res < 11) || (show_codes == 2 && res < 28)): // print 3 points, as long as there is space for them, reading terminal width would be nice for this..
 					fmt.Printf("%s%s%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row], hspace, ansi_cube[dep+2][row]) // col+space+col+space
 					planes_printed = 3
-				case (dep+2 <= res) && ((show_codes == 1 && res < 11) || (res < 18) || (show_codes == 2 && res < 42)): // print 2 planes
+				case (dep+2 <= res) && ((show_codes == 1 && res < 12) || (!(show_codes == 1 || show_codes == 2) && res < 18) || (show_codes == 2 && res < 42)): // print 2 planes
 					fmt.Printf("%s%s%s\n", ansi_cube[dep][row], hspace, ansi_cube[dep+1][row]) // col+space+col+space
 					planes_printed = 2
 				default: // print 1 plane
