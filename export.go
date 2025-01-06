@@ -82,7 +82,7 @@ func Export_Plane_Ansi(plane [][]Vec, format string) []string {
 func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes int) [][]string {
 	res := len(cube)
 	ansi_cube := make([][]string, res)
-	index_channel_maxlen := len(fmt.Sprintf("%x", res-1))
+	max_channel_size := len(fmt.Sprintf("%x", res-1))
 
 	for dep, plane := range cube {
 
@@ -104,7 +104,8 @@ func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes int
 				default: //indecies
 					var index string
 					if res > 16 { //overflows so I need to adjust spacing
-						f_string := fmt.Sprintf("%%%dx%%%dx%%%dx", index_channel_maxlen, index_channel_maxlen, index_channel_maxlen)
+						f_string := fmt.Sprintf("%%%dx%%%dx%%%dx", max_channel_size, max_channel_size, max_channel_size)
+						//the formatted string ends up being %<max_channel_size>x%<max_channel_size>x%<max_channel_size>x.
 						index = fmt.Sprintf(f_string, dep, row, col)
 					} else { //normally behaved string
 						index = fmt.Sprintf("%x%x%x", dep, row, col)
