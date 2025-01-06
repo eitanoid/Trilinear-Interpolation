@@ -84,6 +84,10 @@ func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes int
 	ansi_cube := make([][]string, res)
 	max_channel_size := len(fmt.Sprintf("%x", res-1))
 
+	//index format string, only need to run this once
+	index_f_string := fmt.Sprintf("%%%dx%%%dx%%%dx", max_channel_size, max_channel_size, max_channel_size)
+	//the formatted string ends up being %<max_channel_size>x%<max_channel_size>x%<max_channel_size>x.
+
 	for dep, plane := range cube {
 
 		ansi_cube[dep] = make([]string, res) // each plane is [row]string
@@ -104,9 +108,7 @@ func Export_Cube_Ansi(cube [][][]Vec, format string, spacing int, show_codes int
 				default: //indecies
 					var index string
 					if res > 16 { //overflows so I need to adjust spacing
-						f_string := fmt.Sprintf("%%%dx%%%dx%%%dx", max_channel_size, max_channel_size, max_channel_size)
-						//the formatted string ends up being %<max_channel_size>x%<max_channel_size>x%<max_channel_size>x.
-						index = fmt.Sprintf(f_string, dep, row, col)
+						index = fmt.Sprintf(index_f_string, dep, row, col)
 					} else { //normally behaved string
 						index = fmt.Sprintf("%x%x%x", dep, row, col)
 					}
@@ -130,7 +132,7 @@ func (v Vec) To_Ansi(text string) string {
 	// luma := 0.299*(v[0])/255 + 0.587*(v[1])/255 + 0.144*(v[2])/255
 	luma := 299*int(v[0]) + 587*int(v[1]) + 144*int(v[2])
 	fg := ""
-
+	//luma 600 looks nicer than 500
 	if luma > 600*255 { // multiplying here by 255 is equivalent to dividing each component by 255
 		fg = "30;"
 	}
